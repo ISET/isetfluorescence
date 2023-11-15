@@ -142,12 +142,12 @@ multistepEmNormStd = zeros(nCompounds,1);
 
 try
     cluster = parcluster('local');
-    cluster.NumWorkers = 31;
+    cluster.NumWorkers = 30;
     pool = parpool(cluster,cluster.NumWorkers);
 catch 
 end
 
-for i=1:nCompounds
+parfor i=1:nCompounds
 
     % Create fluorescent scene
     flScene = fluorescentSceneCreate('type','fromfluorophore','wave',wave,'qe',flQe,...
@@ -270,7 +270,7 @@ for i=1:nCompounds
     %% Estimation (multistep Fu et al.)
     
     [ reflEst, reflCoeffs, emEst, emChromaticity, exEst, exCoeffs, reflValsEst, flValsEst, hist ] = fiRecReflAndFlMultistep( measVals,...
-    camera, cameraGain*deltaL, cameraOffset, illuminantPhotons, reflBasis, DB, exBasis, alphaMultistep, gammaMultistep );
+    camera, cameraGain*deltaL, cameraOffset, illuminantPhotons, reflBasis, DB, exBasis, alphaMultistep, gammaMultistep, 'maxIter',50 );
 
 
     % Evaluation

@@ -57,7 +57,7 @@ switch param
         fl.type = val;
         
     case 'qe'
-        if (val > 1), warning('Qe greater than one, truncating to 1'); end
+        % if (val > 1), warning('Qe greater than one, truncating to 1'); end
         val = min(max(val,0),1);
         
         % We only set qe for the excitation-emission representation
@@ -82,18 +82,15 @@ switch param
             fl = rmfield(fl,'donaldsonMatrix');
         end
         
-        % Could always do this.  But we only bother if the values really
-        % are negative and we print a warning so the user can fix.
-        if sum(val<0) > 0
-            warning('Negative values, truncating'); 
-            val = max(val,0);
-        end
+
+        % if sum(val<0) > 0, warning('Emission less than zero, truncating'); end
+        val = max(val,0);
         
-        % HB used to set for unit area under the curve.
-        %{
+        % HB set for unit area under the curve.  I think we might just
+        % normalize to a peak of one going forward.  But need to check.
         deltaL = fluorophoreGet(fl,'deltaWave');
         qe = 1/(sum(val)*deltaL);
-        if qe ~= 1, warning('Emission not normalized'); end
+        % if qe ~= 1, warning('Emission not normalized'); end
         
         val = val*qe;
         %}
@@ -103,7 +100,8 @@ switch param
         
         fl.emission = val(:);
         
-    case {'excitationphotons','excitation'}
+
+    case {'excitationphotons','excitation photons','Excitation photons'}
         
         if length(fluorophoreGet(fl,'wave')) ~= length(val), error('Wavelength sampling mismatch'); end
         
@@ -116,7 +114,7 @@ switch param
         if sum(val<0) > 0, warning('Excitation less than zero, truncating'); end
         val = max(val,0);
         
-        if max(val) ~= 1, warning('Peak excitation different from 1, rescaling'); end
+        % if max(val) ~= 1, warning('Peak excitation different from 1, rescaling'); end
         val = val/max(val);
         
         % Set the NaN values to be zero.

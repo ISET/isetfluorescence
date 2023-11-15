@@ -1,5 +1,6 @@
 % Generate a .tex file with a table contaning comparison results between
-% multi-fluorophore and Suo et al. approaches. This script outputs
+% multi-fluorophore and Suo et al. approaches on simulated data from the
+% McNamara-Boswell fluorophore dataset. This script outputs
 % Table 1 from the supplemental material.
 %
 % Copyright, Henryk Blasinski 2016
@@ -30,20 +31,15 @@ pixelStd(1) = mean(multiFlTotalPixelStd);
 % The nuclear norm algorithm did not always converge. We assume a somewhat
 % arbitrary detection threshold.
 valid = nucNormTotalPixelErr <= 1;
+
 pixelError(2) = mean(nucNormTotalPixelErr(valid));
 pixelStd(2) = mean(nucNormTotalPixelStd(valid));
-
-
-% Reflectance
 
 reflError(1) = mean(multiFlReflErr);
 reflStd(1) = mean(multiFlReflStd);
 
 reflError(2) = mean(nucNormReflErr(valid));
 reflStd(2) = mean(nucNormReflStd(valid));
-
-
-
 
 % Donaldson matrix (absolute) 
 
