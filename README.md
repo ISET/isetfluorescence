@@ -3,21 +3,20 @@
 The ISETfluorescence toolbox provides a set of functions to simulate scenes with fluorescent components. Here, we extend the open-source and freely available tools in Image Systems Engineering Toolbox for cameras (ISETCam).  The  toolbox also implements several reflectance and fluorescence separation and estimation algorithms.
 
 If you use this code in your work, please cite
-
-Simultaneous Surface Reflectance and Fluorescence Spectra Estimation (2020).
-Henryk Blasinski, Joyce Farrell, and Brian Wandell
-IEEE Transactions on Image Processing
-doi:https://doi.org/10.1109/TIP.2020.2973810,
-See also (https://arxiv.org/abs/1605.04243)
-
-We also used this code for
-Simulations of fluorescence imaging in the oral cavity
-https://stanford.edu/~wandell/data/papers//2021-BOE-Zheng.pdf
-Zheng Lyu, Haomiao Jiang, Feng Xiao, Jian Rong, Tingcheng Zhang, Brian Wandell, Joyce Farrell
-Biomedical Optics Express, 12 (7), 4276—4292
-[Biorxiv](https://www.biorxiv.org/content/10.1101/2021.03.31.437770v1)
+<p>
+Simultaneous Surface Reflectance and Fluorescence Spectra Estimation (2020). <br>
+Henryk Blasinski, Joyce Farrell, and Brian Wandell <br>
+[IEEE Transactions on Image Processing](https://doi.org/10.1109/TIP.2020.2973810) <br>
+[Arxiv](https://arxiv.org/abs/1605.04243)
+</p>
+<p>
+We also used this code for <br>
+[Simulations of fluorescence imaging in the oral cavity](https://stanford.edu/~wandell/data/papers//2021-BOE-Zheng.pdf) <br>
+Zheng Lyu, Haomiao Jiang, Feng Xiao, Jian Rong, Tingcheng Zhang, Brian Wandell, Joyce Farrell <br>
+Biomedical Optics Express, 12 (7), 4276—4292 <br>
+[Biorxiv](https://www.biorxiv.org/content/10.1101/2021.03.31.437770v1) <br>
 [Data availability](https://purl.stanford.edu/mc747zz6607)
-
+</p>
 0. License
 ----------
 
@@ -30,8 +29,8 @@ method and apparatus is a subject of a US Patent 20,160,116,410.
 1. Dependencies (required)
 --------------------------
 
-a. Image Systems Engineering Toolbox (ISETCam) (https://github.com/ISET/ISETCam).
-b. cvx Convex Optimization toolbox for Matlab (www.cvxr.com).
+a. Image Systems Engineering Toolbox [ISETCam](https://github.com/ISET/ISETCam). <br>
+b. cvx [Convex Optimization toolbox for Matlab](www.cvxr.com).
 
 
 2. Dependencies (optional)
