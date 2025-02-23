@@ -4,10 +4,19 @@ The ISETfluorescence toolbox provides a set of functions to simulate scenes with
 
 If you use this code in your work, please cite
 
-Henryk Blasinski, Joyce Farrell and Brian Wandell - "Simultaneous reflectance
-and fluorescence spectra estimation" 2016 
-(https://arxiv.org/abs/1605.04243)
+Simultaneous Surface Reflectance and Fluorescence Spectra Estimation (2020).
+Henryk Blasinski, Joyce Farrell, and Brian Wandell
+IEEE Transactions on Image Processing
+doi:https://doi.org/10.1109/TIP.2020.2973810,
+See also (https://arxiv.org/abs/1605.04243)
 
+We also used this code for
+Simulations of fluorescence imaging in the oral cavity
+https://stanford.edu/~wandell/data/papers//2021-BOE-Zheng.pdf
+Zheng Lyu, Haomiao Jiang, Feng Xiao, Jian Rong, Tingcheng Zhang, Brian Wandell, Joyce Farrell
+Biomedical Optics Express, 12 (7), 4276—4292
+[Biorxiv](https://www.biorxiv.org/content/10.1101/2021.03.31.437770v1)
+[Data availability](https://purl.stanford.edu/mc747zz6607)
 
 0. License
 ----------
