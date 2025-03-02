@@ -1,27 +1,30 @@
 function fl = fluorophoreCreate(varargin)
-
-% fl = fluorophoreCreate(...)
+% Creates a fluorophore structure
 %
-% Creates a fluorophore structure, which is a basic unit summarizing
-% fluorescence properties of a particular point in space. A fluorophore is
-% defined in terms of its excitation and emission spectra OR its Donaldson
-% matrix. The two representations are mutually exclusive, i.e. settgin
-% excitation and/or emission spectra deletes the Donaldson matrix field and
-% vice versa.
+% Syntax
+%  fl = fluorophoreCreate(...)
+%
+% Descripton
+%   A fluorophore scructure summarizes the fluorescence properties of a
+%   substrate. We define it in terms of its excitation and emission
+%   spectra, with the emission defined in terms of photons (not energy).
 %
 % Inputs (optional)
 %   'type' - describes the type of fluorophore that is created. Currently
 %      supported options are
+%
 %      'default' - no other input parameters are expected. Creates generic
 %         excitation and emission spectrum as gaussian curves.
+%
 %      'custom' - create a fluorophore from fluorescence excitation and
 %         emission spectra. When 'custom' type is specified the user should
 %         also provide parameters: 'wave','name','solvent','excitation
 %         photons','emission photons','qe'.
-%      'fromdonaldsonmatrix' - create a fluorophore given its Donaldson
-%         matrix properties. When 'fromdonaldsonmatrix' is specified, the
-%         user should also provide parameters: 'wave','name','solvent',
-%         'DonaldsonMatrix'
+%
+%      'fromeem' - create a fluorophore given its EEM (Donaldson
+%         matrix) properties. The user should also provide parameters:
+%         'wave','name','solvent', 'DonaldsonMatrix'
+%
 %   'wave' - a (w x 1) vector of wavelength sampling interval 
 %      (default = 400:10:700)
 %   'name' - the name of the fluorophore.
@@ -29,9 +32,9 @@ function fl = fluorophoreCreate(varargin)
 %      diluted. Same fluorophore with different solvents can produce 
 %      different fluorescence properties.
 %   'excitation' - a (w x 1) vector representing the fluorescence
-%      excitation properties (default = [0 0 ... 0]).
+%      excitation properties (photons, default = [0 0 ... 0]).
 %   'emission' - a (w x 1) vector representing the fluorescence emission
-%      properties (default = [0 0 ... 0]).
+%      properties (photons, default = [0 0 ... 0]).
 %   'qe' - fluorophore quantum efficiency, defined as the ratio between
 %      total number of incident and emitted photons (default = 1).
 %   'DonaldsonMatrix' - a (w x w) array representing the Donaldson matrix
@@ -40,23 +43,43 @@ function fl = fluorophoreCreate(varargin)
 % Outputs
 %    fl - a fluorophore structure
 %
+% Description
+%  We are using only the ExEm vectors, and we derive the Donaldson matrix.
+%  We downloaded PARAFAC to derive ExEm from the Donaldson matrix.
+%
 % Copyright Henryk Blasinski 2016
+%
+% See also
+%   fluorophoreRead, fluorophoreSave, fluorophoreSet
 
+% Examples:
+%{
+   wave = 400:10:700;
+   thisF = fluorophoreCreate('type','custom',...
+      'name','testcase',...
+      'solvent','water', ...
+      'wave', wave, ...
+      'excitation',ones(length(wave),1),...
+      'emission',ones(length(wave),1));
+   disp(thisF)
+   fluorophorePlot(thisF,'donaldson matrix')
+%}
+%%
 p = inputParser;
 
-p.addParamValue('type','default',@ischar);
-p.addParamValue('wave',400:10:700,@isvector);
-p.addParamValue('name','',@(x)(ischar(x) || isempty(x)));
-p.addParamValue('solvent','',@(x)(ischar(x) || isempty(x)));
-p.addParamValue('excitation',zeros(31,1),@isnumeric);
-p.addParamValue('emission',zeros(31,1),@isnumeric);
-p.addParamValue('qe',1,@isscalar);
-p.addParamValue('DonaldsonMatrix',[],@isnumeric);
+p.addParameter('type','default',@ischar);
+p.addParameter('wave',400:10:700,@isvector);
+p.addParameter('name','',@(x)(ischar(x) || isempty(x)));
+p.addParameter('solvent','',@(x)(ischar(x) || isempty(x)));
+p.addParameter('excitation',zeros(31,1),@isnumeric);
+p.addParameter('emission',zeros(31,1),@isnumeric);
+p.addParameter('qe',1,@isscalar);
+p.addParameter('eem',[],@isnumeric);
 
 p.parse(varargin{:});
 inputs = p.Results;
 
-
+%%
 fl.name = inputs.name;
 fl.type = 'fluorophore';
 fl = initDefaultSpectrum(fl,'custom',inputs.wave);
@@ -70,11 +93,11 @@ type = strrep(type,' ','');
 
 switch type
     
-    case 'fromdonaldsonmatrix'
+    case 'fromeem'
         fl = fluorophoreCreate('wave',inputs.wave);
         fl = fluorophoreSet(fl,'name',inputs.name);
         fl = fluorophoreSet(fl,'solvent',inputs.solvent);
-        fl = fluorophoreSet(fl,'Donaldson matrix',inputs.DonaldsonMatrix);
+        fl = fluorophoreSet(fl,'eem',inputs.eem);
         fl = fluorophoreSet(fl,'qe',1);
     
     case 'custom'
@@ -93,7 +116,6 @@ switch type
         
         deltaL = inputs.wave(2) - inputs.wave(1);
 
-        
         emWave = 550;
         em = exp(-(fl.spectrum.wave - emWave).^2/2/(15^2));
         em = em/sum(em)/deltaL;
@@ -110,4 +132,4 @@ switch type
 end
 
 
-return;
+end

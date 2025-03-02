@@ -1,16 +1,11 @@
 function val = fluorophoreGet(fl,param,varargin)
-
-% val = fluorophoreGet(fl,param,...)
-% 
-% The getter method of the fluorophore object. This function is used to
-% extract different properties of the fluorophore object.
 %
-% Examples:
-%   em = fluorophoreGet(fl,'emission');
-%   name = fluorophoreGet(fl,'name');
+% Syntax
+%   val = fluorophoreGet(fl,param,...)
 % 
-%   ill = illuminantCreate('d65');
-%   ph = fluorophoreGet(fl,'photons',ill);
+% Description
+%   The getter method of the fluorophore object. This function is used to
+%   extract different properties of the fluorophore object.
 %
 % Inputs:
 %   fl - a fluorophore structure
@@ -25,15 +20,21 @@ function val = fluorophoreGet(fl,param,varargin)
 %      'emission'                 - fluorophore's emission spectrum
 %      'normalized emission'      - fluorophore's emission normalized to
 %                                   unit amplitude
-%      'peak emission'            - peak emission wavelenght in nm
+%      'peak emission'            - peak emission wavelength in nm
 %
 %      'excitation'               - fluorophore's excitation spectrum
 %      'peak excitation'          - peak excitation wavelength in nm
 %      'normalized excitation'    - fluorophore's excitation spectrum
 %                                   normalized to unit amplitude
 %
-%      'Donaldson matrix'         - fluorophore's Donaldson matrix
+%      'eem photons'              - Excitation-Emission matrix; also
+%                                   called the Donaldson matrix.  Expressed
+%                                   here in terms of photons which is
+%                                   typical in the literature????
 %
+%      'eem energy'               - If you know the excitation light in
+%                                   energy and you want the emission in
+%                                   energy, you can use this.
 %
 %      'Stokes shift'             - wavelength shift between excitation and
 %                                   emission peaks
@@ -53,17 +54,44 @@ function val = fluorophoreGet(fl,param,varargin)
 % Outputs:
 %    val - the value of the requested property.
 %
+% Examples:
+%   em = fluorophoreGet(fl,'emission');
+%   name = fluorophoreGet(fl,'name');
+% 
+%   ill = illuminantCreate('d65');
+%   ph = fluorophoreGet(fl,'photons',ill);
+%
 % Copyright Henryk Blasinski, 2016
+%
+% See also  fluorophoreCreate, fluorophoreSet, fluorophoreRead
+%
+
+% Example:
+%{
+elastin = fiReadFluorophore('elastin_webfluor.mat','wave',wave);
+emission = fluorophoreGet(elastin,'emission','wave',wave);
+% ieNewGraphWin; plot(wave,emission);
+%}
 
 %% Parameter checking
-if ~exist('fl','var') || isempty(fl), error('Fluorophore structure required'); end
-if ~exist('param','var') || isempty(param), error('param required'); end
+p = inputParser;
+p.addRequired('fl',@isstruct);
+p.addRequired('param',@ischar);
 
+% When reading an emission or other wavelength we can set the wavelength
+% sampling vector
+p.addParameter('wave',[],@isvector);
+p.parse(fl,param,varargin{:});
+
+wave = p.Results.wave;
+if isfield(fl,'spectrum'), fwave = fl.spectrum.wave; end
+if isvector(fwave), fwave = fwave(:); end
 val = [];
 
 %% Main switch statement
-param = lower(param);
-param = strrep(param,' ','');
+param = ieParamFormat(param);
+% param = lower(param);
+% param = strrep(param,' ','');
 
 switch param
     case 'name'
@@ -73,63 +101,169 @@ switch param
         % Should always be 'fluorophore'
         val = fl.type;
        
-    case {'emission','emission photons','Emission photons','emissionphotons'}
-        
+    case {'emission','emissionphotons'}
+        % Data are stored in photon units
         if ~checkfields(fl,'emission'), val = []; return; end
-        val = fl.emission;
+        val = fl.emission(:);
+        if ~isempty(wave)
+            val = interp1(fwave,val,wave);
+        end
 
-    case {'norm emission','normemission','normalizedemission'}
+    case {'emissionenergy'}
+        val = fluorophoreGet(fl,'emission');  % Photons
+        val = Quanta2Energy(fwave,val);
+        if ~isempty(wave), val = interp1(fwave,val,wave); end
+
+    case {'normemission','normalizedemission'}
         if ~checkfields(fl,'emission'), val = []; return; end
-        val = fl.emission/max(fl.emission);
-        
+        val = fl.emission(:)/max(fl.emission);
+        if ~isempty(wave), val = interp1(fwave,val,wave); end
+
     case {'excitation','excitationphotons'}
-        
+        % Data are stored in photon units (not energy)
         if ~checkfields(fl,'excitation'), val = []; return; end
-        val = fl.excitation;
-        
-    case {'norm excitation','normexcitation','normalizedexcitation'}
+        val = fl.excitation(:);
+        if ~isempty(wave), val = interp1(fwave,val,wave); end
+
+    case {'excitationenergy'}
+        val = fluorophoreGet(fl,'excitation');  % Photons
+        val = Quanta2Energy(fwave,val);
+        if ~isempty(wave), val = interp1(fwave,val,wave); end
+
+    case {'normexcitation','normalizedexcitation'}
         if ~checkfields(fl,'excitation'), val = []; return; end
-        val = fl.excitation/max(fl.excitation);
-        
-    case {'peakexcitation','peak excitation'}
+        val = fl.excitation(:)/max(fl.excitation);
+        if ~isempty(wave), val = interp1(fwave,val,wave); end
+
+    case {'peakexcitation'}
         if ~checkfields(fl,'excitation'), val = []; return; end
         [~, id] = max(fl.excitation);
         val = fl.spectrum.wave(id);    
         
-    case {'peakemission','peak emission'}
+    case {'peakemission'}
         if ~checkfields(fl,'emission'), val = []; return; end
         [~, id] = max(fl.emission);
         val = fl.spectrum.wave(id);
         
-    case {'Stokes shift','stokesshift'}
+    case {'stokesshift'}
+        % Difference between the peak emission and peak excitation
         val = fluorophoreGet(fl,'peakemission') - fluorophoreGet(fl,'peakexcitation');
         
     case 'wave'
         if isfield(fl,'spectrum'), val = fl.spectrum.wave; end
         if isvector(val), val = val(:); end
         
-    case {'deltawave','deltaWave'}
+    case {'deltawave'}
         wave = fluorophoreGet(fl,'wave');
         val = wave(2) - wave(1);
      
-    case {'donaldsonmatrix'}
-        
-        % If the fluorophore is defined in terms of the Donaldson matrix,
-        % then return the matrix, otherwise compute it from the excitation
-        % and emission spectra.
-        deltaL = fluorophoreGet(fl,'deltaWave');
+    case {'eemphotons','eem','excitationemissionmatrix'}
+        % This is the excitation emission matrix. It is structured so that
+        %
+        %     fluorescenceSpectrum = dMatrix * illuminantPhotons(:)
+        %
+        % 
+        if ~isempty(wave), error('No eem photons wave resampling implemented yet.'); end
+
+        deltaL = fluorophoreGet(fl,'delta wave');
 
         if isfield(fl,'donaldsonMatrix')
+            % If the fluorophore is defined in terms of the Donaldson matrix,
+            % then return the matrix.
+            warning('Please change the fluorophore file from donaldsonMatrix to eem');
             val = fl.donaldsonMatrix*deltaL;
+        elseif isfield(fl,'eem')
+            % We want this name instead.  Converting for now, will
+            % eliminate donaldson path over time.
+            val = fl.eem*deltaL;
         else
-               
-            ex = fluorophoreGet(fl,'excitation photons');
-            em = fluorophoreGet(fl,'emission photons');
-            qe = fluorophoreGet(fl,'qe');
+            % Otherwise compute the Donaldson matrix from excitation and
+            % emission vectors.
+            ex = fluorophoreGet(fl,'excitation photons');  % Column
+            em = fluorophoreGet(fl,'emission photons');    % Column
             
-            % Apply the Stoke's constraint
-            val = qe*tril(em*ex',-1)*deltaL;
+            % Logic of the EEM is that an excitation photon at some
+            % wavelength produces an emission spectrum.  We make the
+            % emission vector sum to one (every photon goes somewhere, but
+            % no amplificiation). 
+            em = em/sum(em(:));
+            
+            % We scale the excitation vector so that it has a maximum of
+            % one, though we could scale it so that it sums to one.  Either
+            % way is probably OK because, well, there are no units here.
+            ex = ex/max(ex(:));
+            
+            % We take the outer product so that every column of the
+            % Donaldson matrix is the emission, scaled by the relative
+            % excitability
+            eem = em(:)*ex(:)';
+            
+            % Finally, we apply the Stoke's constraint so that only
+            % photons with  energy lower than the energy of the
+            % excitation wavelength (longer wavelengths than the
+            % excitation wavelength) are emitted.
+            %
+            % We leave out the main diagonal (-1 argument) which would
+            % normally contain the reflectance function
+            %
+            % deltaL is the wavelength spacing (delta lambda)
+            val = tril(eem,-1) * deltaL;
+            
+            % Sometime the excitation and emission have NaNs.
+            % Set NaNs to 0
+            val(isnan(val)) = 0;
+            
+            % Historical note:  Delete some day.
+            %
+            % qe = fluorophoreGet(fl,'qe');
+            % The fluorophore only sees a fraction of the incident
+            % photons from the light.  We call that the quantum
+            % efficiency of the fluorophore (a scalar).
+            %
+            % We have disabled this because it depends a great deal on the
+            % solvent and general imaging conditions.
+            
         end
+        
+        % No NaNs on the return.  Make the NaNs 0
+        val(isnan(val)) = 0;
+    case {'eemenergy'}
+        % The eems are always stored in photons, if the person wants to use
+        % the energy, we place the energy2quanta scalers on either side to
+        % convert the photon to energy.
+        
+        % We do not resample w.r.t. wavelength here.
+        if ~isempty(wave), error('No eem wave resampling implemented yet.'); end
+        %{
+            wave = 365:5:705;
+            flName = 'elastin_webfluor';
+            thisFluo = fluorophoreRead(flName,'wave',wave');
+            eemEnergy = fluorophoreGet(thisFluo, 'eem energy');
+            
+            % Create a spectrum in photon
+            spd = ones(size(wave));
+            
+            % The number of photons we get based on the eemPhoton will be:
+        %}
+        
+        eemPhoton = fluorophoreGet(fl, 'eem');
+        wave = fluorophoreGet(fl, 'wave');
+        
+        e2q = diag(Energy2Quanta(wave, ones(size(wave))));
+        q2e = diag(Quanta2Energy(wave, ones(size(wave))'));
+        
+        eemEnergy = q2e * eemPhoton * e2q;
+        
+        val = eemEnergy;
+        
+        % No NaNs on the return.  Make the NaNs 0
+        val(isnan(val)) = 0;
+        
+    case {'eemenergynormalize'}
+        val = fluorophoreGet(fl, 'eemenergy');
+        warning('Peak of EEM is scaling to 1')
+        val = val / max(val(:));
+        val(isnan(val)) = 0;
         
     case {'photons'}
         illWave  = illuminantGet(varargin{1},'wave');
@@ -141,8 +275,7 @@ switch param
         val = DM*illSpd;
         
     case 'nwave'
-        
-        val = length(fluorophoreGet(fl,'wave'));
+        val = length(fwave);
         
     case 'comment'
         val = fl.comment;

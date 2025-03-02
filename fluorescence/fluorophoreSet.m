@@ -28,7 +28,8 @@ function fl = fluorophoreSet(fl,param,val,varargin)
 %                                   from 1
 %      'qe'                       - fluorophore's quantum efficiency
 %
-%      'Donaldson matrix'         - fluorophore's Donaldson matrix
+%      'eem photons'              - fluorophore's excitation emission
+%                                   matrix, also known as the Donaldson matrix 
 %
 %      'wave'                     - spectral sampling vector
 %
@@ -45,8 +46,7 @@ if ~exist('val','var') , error('val is required'); end
 %%
 
 % Lower case and remove spaces
-param = lower(param);
-param = strrep(param,' ','');
+param = ieParamFormat(param);
 
 switch param
     case 'name'
@@ -65,86 +65,125 @@ switch param
             fl.qe = val;
         end
         
-    case {'emission photons','Emission photons','emissionphotons'}
-        if length(fluorophoreGet(fl,'wave')) ~= length(val), error('Wavelength sampling mismatch'); end
+    case {'emissionphotons','emission'}
+        % We normally store the emission spectrum as relative (peak set to
+        % 1) because we do not have a meaningful scale for the emission
+        % spectrum.  It will depend on the concentration of the molecules
+        % and properties of the solvent w.r.t. efficacy.  So the scaling
+        % needs to be done by the user.
+        
+        if length(fluorophoreGet(fl,'wave')) ~= length(val) 
+            error('Wavelength sampling mismatch'); 
+        end
         
         % If the fluorophore happened to be defined with a Donaldson
         % matrix, remove the matrix from the structure;
-        if isfield(fl,'donaldsonMatrix'), 
+        if isfield(fl,'donaldsonMatrix') 
             fl = rmfield(fl,'donaldsonMatrix');
         end
         
+
         % if sum(val<0) > 0, warning('Emission less than zero, truncating'); end
         val = max(val,0);
         
+        % HB set for unit area under the curve.  I think we might just
+        % normalize to a peak of one going forward.  But need to check.
         deltaL = fluorophoreGet(fl,'deltaWave');
         qe = 1/(sum(val)*deltaL);
         % if qe ~= 1, warning('Emission not normalized'); end
         
         val = val*qe;
+        %}
+        
+        % Set the NaN values to be zero.
+        val(isnan(val)) = 0;
+        
         fl.emission = val(:);
         
-      
-        
+
     case {'excitationphotons','excitation photons','Excitation photons'}
         
         if length(fluorophoreGet(fl,'wave')) ~= length(val), error('Wavelength sampling mismatch'); end
         
         % If the fluorophore happened to be defined with a Donaldson
         % matrix, remove the matrix from the structure;
-        if isfield(fl,'donaldsonMatrix'), 
+        if isfield(fl,'donaldsonMatrix') 
             fl = rmfield(fl,'donaldsonMatrix');
         end
         
-        
-        
-        % if sum(val<0) > 0, warning('Excitation less than zero, truncating'); end
+        if sum(val<0) > 0, warning('Excitation less than zero, truncating'); end
         val = max(val,0);
         
         % if max(val) ~= 1, warning('Peak excitation different from 1, rescaling'); end
         val = val/max(val);
         
+        % Set the NaN values to be zero.
+        val(isnan(val)) = 0;
+        
         fl.excitation = val(:);
         
-    case {'donaldsonmatrix'}
-        if length(fluorophoreGet(fl,'wave')) ~= size(val,1) || length(fluorophoreGet(fl,'wave')) ~= size(val,2)
+    case {'eemphotons','donaldsonmatrix', 'eem'}
+        if length(fluorophoreGet(fl,'wave')) ~= size(val,1) || ...
+                length(fluorophoreGet(fl,'wave')) ~= size(val,2)
             error('Wavelength sampling mismatch'); 
         end
         
-        % Remove all fields that are relevant to one
-        if isfield(fl,'excitation'), 
+        if max(val(:)) < 1
+            warning('Guessing this is in energy units, not photons.  Please fix.'); 
+        end
+        
+        % We used to remove all fields that are no longer relevant because
+        % we have the EEM.  But sometimes we have the EEM and we use
+        % parafac to derive excitation and emission.  In that case, we
+        % create the fluorophore with the excitation and emission, and then
+        % add the EEM that was used to derive.  So we no longer delete the
+        % excitation and emission.
+        if isfield(fl,'excitation')
+            disp("Adding the measured EEM to a fluorophore that has a excitation and emission.")
+        end
+        %{
+        if isfield(fl,'excitation') 
             fl = rmfield(fl,'excitation');
             fl = rmfield(fl,'emission');
             fl = rmfield(fl,'qe');
         end
+        %}
         
-        fl.donaldsonMatrix = val;
-        
-        
+        fl.eem = val;
+                
     case {'wave','wavelength'}
         
         % Need to interpolate data sets and reset when wave is adjusted.
         oldW = fluorophoreGet(fl,'wave');
         newW = val(:);
-        fl.spectrum.wave = newW;
 
         % Interpolate excitation and emission spectra or the Donaldson
         % matrix
-        if isfield(fl,'donaldsonMatrix'),
+        if isfield(fl,'donaldsonMatrix')
+            % Changed but not properly tested.  FInd a test.
             [oldWem, oldWex] = meshgrid(oldW,oldW);
             [newWem, newWex] = meshgrid(newW,newW);
-            
+
             newDM = interp2(oldWem,oldWex,fluorophoreGet(fl,'Donaldson matrix'),newWem,newWex,'linear',0);
+            fl.spectrum.wave = newW;
             fl = fluorophoreSet(fl,'Donaldson matrix',newDM);
-            
+
         else
-            newExcitation = interp1(oldW,fluorophoreGet(fl,'excitation photons'),newW,'linear',0);
+            excitation = fluorophoreGet(fl,'excitation photons','wave',oldW);
+            newExcitation = interp1(oldW,excitation,newW);
+            % plot(oldW,excitation,'k-',newW,newExcitation,'r:');
+            if max(newExcitation) <= eps
+                warning('No excitation sensitivity in this waveband');
+            end
+            emission = fluorophoreGet(fl,'emission photons','wave',oldW);
+            newEmission = interp1(oldW,emission,newW,'linear',0);
+
+            fl.spectrum.wave = newW;
             fl = fluorophoreSet(fl,'excitation photons',newExcitation);
-        
-            newEmission = interp1(oldW,fluorophoreGet(fl,'emission photons'),newW,'linear',0);
             fl = fluorophoreSet(fl,'emission photons',newEmission);
+
         end
-    
+
     case 'solvent'
         fl.solvent = val;
         
