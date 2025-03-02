@@ -173,7 +173,7 @@ switch param
             newExcitation = interp1(oldW,excitation,newW);
             % plot(oldW,excitation,'k-',newW,newExcitation,'r:');
             if max(newExcitation) <= eps
-                warning('No excitation sensitivity in this waveband');
+                warning('%s: No excitation sensitivity in this waveband',fl.name);
             end
             emission = fluorophoreGet(fl,'emission photons','wave',oldW);
             newEmission = interp1(oldW,emission,newW,'linear',0);
