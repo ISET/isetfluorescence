@@ -106,7 +106,7 @@ switch param
         if ~checkfields(fl,'emission'), val = []; return; end
         val = fl.emission(:);
         if ~isempty(wave)
-            val = interp1(fwave,val,wave);
+            val = interp1(fwave,val,wave,'linear',0);
         end
 
     case {'emissionenergy'}
@@ -114,26 +114,26 @@ switch param
         val = Quanta2Energy(fwave,val);
         if ~isempty(wave), val = interp1(fwave,val,wave); end
 
-    case {'normemission','normalizedemission'}
+    case {'normalizedemission'}
         if ~checkfields(fl,'emission'), val = []; return; end
         val = fl.emission(:)/max(fl.emission);
-        if ~isempty(wave), val = interp1(fwave,val,wave); end
+        if ~isempty(wave), val = interp1(fwave,val,wave,'linear',0); end
 
     case {'excitation','excitationphotons'}
         % Data are stored in photon units (not energy)
         if ~checkfields(fl,'excitation'), val = []; return; end
         val = fl.excitation(:);
-        if ~isempty(wave), val = interp1(fwave,val,wave); end
+        if ~isempty(wave), val = interp1(fwave,val,wave,'linear',0); end
 
     case {'excitationenergy'}
         val = fluorophoreGet(fl,'excitation');  % Photons
         val = Quanta2Energy(fwave,val);
-        if ~isempty(wave), val = interp1(fwave,val,wave); end
+        if ~isempty(wave), val = interp1(fwave,val,wave,'linear',0); end
 
-    case {'normexcitation','normalizedexcitation'}
+    case {'normalizedexcitation'}
         if ~checkfields(fl,'excitation'), val = []; return; end
         val = fl.excitation(:)/max(fl.excitation);
-        if ~isempty(wave), val = interp1(fwave,val,wave); end
+        if ~isempty(wave), val = interp1(fwave,val,wave,'linear',0); end
 
     case {'peakexcitation'}
         if ~checkfields(fl,'excitation'), val = []; return; end
