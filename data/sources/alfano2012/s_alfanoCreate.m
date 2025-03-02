@@ -1,0 +1,66 @@
+%% s_beckerCreate
+%
+%  We only have emissions from Alfano 2013.  So we are making up kind of a
+%  dummy fluorescence structure.
+
+%%
+ieInit;
+
+%% FAD
+
+wave = 490:610;
+emission = ieReadSpectra('FAD_emissions_Alfano',wave);
+
+FADF = fluorophoreCreate('type','custom',...
+    'name','FAD',...
+    'solvent','none', ...
+    'wave', wave, ...
+    'excitation',ones(size(wave)),...
+    'emission',emission);
+
+comment = 'See s_alfanoCreate. Only emission data provided.';
+savePath = fullfile(fiToolboxRootPath,'data','Alfano2012','FADAlfano');
+fiSaveFluorophore(savePath, FADF);
+
+%% Collagen
+emission = ieReadSpectra('collagen_emissions_Alfano',wave);
+
+collagenF = fluorophoreCreate('type','custom',...
+    'name','collagen',...
+    'solvent','none', ...
+    'wave', wave, ...
+    'excitation',ones(size(wave)),...
+    'emission',emission);
+
+savePath = fullfile(fiToolboxRootPath,'data','Alfano2012','CollagenAlfano');
+fiSaveFluorophore(savePath, collagenF);
+
+%% Elastin
+
+emission = ieReadSpectra('elastin_emissions_Alfano',wave);
+
+elastinF = fluorophoreCreate('type','custom',...
+    'name','elastin',...
+    'solvent','none', ...
+    'wave', wave, ...
+    'excitation',ones(size(wave)),...
+    'emission',emission);
+
+savePath = fullfile(fiToolboxRootPath,'data','Alfano2012','ElastinAlfano');
+fiSaveFluorophore(savePath, elastinF);
+
+%% NADH
+
+emission = ieReadSpectra('NADH_emissions_Alfano',wave);
+
+NADHF = fluorophoreCreate('type','custom',...
+    'name','NADH',...
+    'solvent','none', ...
+    'wave', wave, ...
+    'excitation',ones(size(wave)),...
+    'emission',emission);
+
+savePath = fullfile(fiToolboxRootPath,'data','Alfano2012','NADHAlfano');
+fiSaveFluorophore(savePath, NADHF);
+
+%%

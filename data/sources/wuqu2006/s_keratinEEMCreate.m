@@ -82,8 +82,8 @@ fluorophorePlot(keratinF,'emission');
 %}
     
 %% Save
-comment = 'See s_keratinEEMCreate. EEM data from Wu&Qu. parafac (N=1) derived excitation/emission.';
-savePath = fullfile(fiToolboxRootPath,'data','Wu&Qu_2006','KeratinWuQu');
+comment = 'See s_keratinEEMCreate. EEM data from wuqu3006. parafac (N=1) derived excitation/emission.';
+savePath = fullfile(fiToolboxRootPath,'data','WuQu2006','KeratinWuQu');
 fiSaveFluorophore(savePath, keratinF);
 
 %% END

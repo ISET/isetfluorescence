@@ -4,7 +4,7 @@
 
 %%
 ieInit;
-datadir = fullfile(fiToolboxRootPath,'data','sources','Wu&Qu_2006');
+datadir = fullfile(fiToolboxRootPath,'data','sources','wuqu2006');
 chdir(datadir);
 
 %% These are the emissions (photons, arbitrary units) when excited by different wavelengths
@@ -74,7 +74,7 @@ fluorophorePlot(collagenFluo,'emission');
 
 %% Save
 comment = 'See s_collagenEEMCreate. EEM data from Wu&Qu. parafac (N=1) derived excitation/emission.';
-savePath = fullfile(fiToolboxRootPath,'data','Wu&Qu_2006','CollagenWuQu');
+savePath = fullfile(fiToolboxRootPath,'data','WuQu2006','CollagenWuQu');
 fiSaveFluorophore(savePath, collagenFluo);
 
 %{
