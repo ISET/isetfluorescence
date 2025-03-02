@@ -79,7 +79,7 @@ comment    = inputs.comment;
 % Special case for HB when there are only excitation and emission vectors
 excitation = inputs.fl.excitation/max(inputs.fl.excitation);
 emission   = inputs.fl.emission/max(inputs.fl.emission);
-wave       = inputs.fl.wave;
+wave       = inputs.fl.spectrum.wave;
 
 save(fName,'name','solvent','excitation','emission','eem','comment','wave');
 

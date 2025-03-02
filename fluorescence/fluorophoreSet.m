@@ -132,39 +132,58 @@ switch param
             warning('Guessing this is in energy units, not photons.  Please fix.'); 
         end
         
-        % Remove all fields that are relevant to one
+        % We used to remove all fields that are no longer relevant because
+        % we have the EEM.  But sometimes we have the EEM and we use
+        % parafac to derive excitation and emission.  In that case, we
+        % create the fluorophore with the excitation and emission, and then
+        % add the EEM that was used to derive.  So we no longer delete the
+        % excitation and emission.
+        if isfield(fl,'excitation')
+            disp("Adding the measured EEM to a fluorophore that has a excitation and emission.")
+        end
+        %{
         if isfield(fl,'excitation') 
             fl = rmfield(fl,'excitation');
             fl = rmfield(fl,'emission');
             fl = rmfield(fl,'qe');
         end
+        %}
         
-        fl.donaldsonMatrix = val;
+        fl.eem = val;
                 
     case {'wave','wavelength'}
         
         % Need to interpolate data sets and reset when wave is adjusted.
         oldW = fluorophoreGet(fl,'wave');
         newW = val(:);
-        fl.spectrum.wave = newW;
 
         % Interpolate excitation and emission spectra or the Donaldson
         % matrix
         if isfield(fl,'donaldsonMatrix')
+            % Changed but not properly tested.  FInd a test.
             [oldWem, oldWex] = meshgrid(oldW,oldW);
             [newWem, newWex] = meshgrid(newW,newW);
-            
+
             newDM = interp2(oldWem,oldWex,fluorophoreGet(fl,'Donaldson matrix'),newWem,newWex,'linear',0);
+            fl.spectrum.wave = newW;
             fl = fluorophoreSet(fl,'Donaldson matrix',newDM);
-            
+
         else
-            newExcitation = interp1(oldW,fluorophoreGet(fl,'excitation photons'),newW,'linear',0);
+            excitation = fluorophoreGet(fl,'excitation photons','wave',oldW);
+            newExcitation = interp1(oldW,excitation,newW);
+            % plot(oldW,excitation,'k-',newW,newExcitation,'r:');
+            if max(newExcitation) <= eps
+                warning('No excitation sensitivity in this waveband');
+            end
+            emission = fluorophoreGet(fl,'emission photons','wave',oldW);
+            newEmission = interp1(oldW,emission,newW,'linear',0);
+
+            fl.spectrum.wave = newW;
             fl = fluorophoreSet(fl,'excitation photons',newExcitation);
-        
-            newEmission = interp1(oldW,fluorophoreGet(fl,'emission photons'),newW,'linear',0);
             fl = fluorophoreSet(fl,'emission photons',newEmission);
+
         end
-    
+
     case 'solvent'
         fl.solvent = val;
         

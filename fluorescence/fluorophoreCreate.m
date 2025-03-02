@@ -12,16 +12,19 @@ function fl = fluorophoreCreate(varargin)
 % Inputs (optional)
 %   'type' - describes the type of fluorophore that is created. Currently
 %      supported options are
+%
 %      'default' - no other input parameters are expected. Creates generic
 %         excitation and emission spectrum as gaussian curves.
+%
 %      'custom' - create a fluorophore from fluorescence excitation and
 %         emission spectra. When 'custom' type is specified the user should
 %         also provide parameters: 'wave','name','solvent','excitation
 %         photons','emission photons','qe'.
-%      'fromdonaldsonmatrix' - create a fluorophore given its Donaldson
-%         matrix properties. When 'fromdonaldsonmatrix' is specified, the
-%         user should also provide parameters: 'wave','name','solvent',
-%         'DonaldsonMatrix'
+%
+%      'fromeem' - create a fluorophore given its EEM (Donaldson
+%         matrix) properties. The user should also provide parameters:
+%         'wave','name','solvent', 'DonaldsonMatrix'
+%
 %   'wave' - a (w x 1) vector of wavelength sampling interval 
 %      (default = 400:10:700)
 %   'name' - the name of the fluorophore.
