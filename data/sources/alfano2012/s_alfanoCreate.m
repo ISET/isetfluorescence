@@ -5,10 +5,9 @@
 
 %%
 ieInit;
+wave = 380:800;
 
 %% FAD
-
-wave = 490:610;
 emission = ieReadSpectra('FAD_emissions_Alfano',wave);
 
 FADF = fluorophoreCreate('type','custom',...
