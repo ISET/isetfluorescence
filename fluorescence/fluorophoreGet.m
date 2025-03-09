@@ -51,6 +51,8 @@ function val = fluorophoreGet(fl,param,varargin)
 %                                   needs to be passed as a parameter (see
 %                                   example).
 %
+%      'comment'                  - Useful info, we hope
+%
 % Outputs:
 %    val - the value of the requested property.
 %

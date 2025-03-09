@@ -57,7 +57,7 @@ function fiSaveFluorophore( fName, fl, varargin )
 p = inputParser;
 p.addRequired('fName',@ischar);
 p.addRequired('fl',@isstruct);
-p.addOptional('comment','',@ischar);
+p.addParameter('comment','',@ischar);
 
 p.parse(fName,fl,varargin{:});
 inputs = p.Results;

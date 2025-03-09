@@ -186,6 +186,8 @@ switch param
 
     case 'solvent'
         fl.solvent = val;
+    case 'comment'
+        fl.comment = val;
         
     otherwise
         error('Unknown fluorophore parameter %s\n',param)
