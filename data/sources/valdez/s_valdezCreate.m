@@ -8,9 +8,13 @@ ieInit;
 wave = 380:800;
 
 %% FAD
-[emission,~,comment] = ieReadSpectra('FAD_405light_425filter',wave);
-comment = addText(comment,...
-    sprintf('\nSee s_valdezCreate.\nThis is emission with a 405 excitation measured through a 425 nm filter.'));
+
+% The three excitation files are all similar.  This one has the best
+% SNR because 450nm is the peak excitation wavelength.
+% The blocking filter is irrelevant because there is very little or no
+% signal up to 475nm.
+[emission,~,comment] = ieReadSpectra('FAD_450light_475filter',wave);
+comment = addText(sprintf('See s_valdezCreate.\n'), comment);
 
 FADF = fluorophoreCreate('type','custom',...
     'name','FAD',...
@@ -23,14 +27,18 @@ FADF = fluorophoreCreate('type','custom',...
 savePath = fullfile(fiToolboxRootPath,'data','Valdez','FADValdez');
 fiSaveFluorophore(savePath, FADF);
 
+%{
+tmp = fiReadFluorophore('FADValdez','wave',wave);
+fluorophorePlot(tmp,'emission');
+tmp.comment
+%}
 %% Keratin
 
 [emission,~,comment] = ieReadSpectra('Keratin_405light_425filter',wave);
-comment = addText(comment,...
-    sprintf('\nSee s_valdezCreate.\nThis is emission with a 405 excitation measured through a 425 nm filter.'));
+comment = addText(sprintf('See s_valdezCreate.\n'), comment);
 
 keratinF = fluorophoreCreate('type','custom',...
-    'name','collagen',...
+    'name','keratin',...
     'solvent','none', ...
     'wave', wave, ...
     'excitation',ones(size(wave)),...
@@ -40,4 +48,8 @@ keratinF = fluorophoreCreate('type','custom',...
 savePath = fullfile(fiToolboxRootPath,'data','Valdez','KeratinValdez');
 fiSaveFluorophore(savePath, keratinF);
 
+%{
+ tmp = fiReadFluorophore('KeratinValdez','wave',wave);
+ fluorophorePlot(tmp,'emission');
+%}
 %%
