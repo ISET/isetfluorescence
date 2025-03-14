@@ -1,52 +1,57 @@
 function [ fl ] = fiReadFluorophore( fName, varargin )
 % Read fluorophore spectral properties from a Matlab (.mat) file fName.
 %
-% [ fl ] = fiReadFluorophore( fName,...)
+% Synopsis
+%   fl = fiReadFluorophore( fName, varargin)
 %
-% Fluorescent properties should have been saved using fiSaveFluorophore.
+% Brief
+%
+%  The fName (Fluorescent file) should have been saved using
+%  fiSaveFluorophore. 
 %
 % Inputs:
-%   fName - path to the data file
+%   fName - path to the fluorescence data file
 %
-% Inputs (optional):
-%   'wave' - a vector of waveband samples (default = 400:10:700).
+% key/val  parameters
+%   'wave' - a vector of waveband samples. Defaults to file data.
 %   'qe'   - fluorophore quantum efficiency (default = 1).
 %
 % Output:
 %   fl - the fiToolbox fluorophore structure
 %
-% Examples
-%   fName  = fullfile(fiToolboxRootPath,'data','LifeTechnologies','phRodoRed.mat');
-%   fl  = fiReadFluorophore(fName);
-%
-% Copyright, Henryk Blasinski 2016
+% See also
+%  fluorophoreGet, fluorophosreSet fiSaveFluorophore
 
 % Examples:
 %{
   files = dir(fullfile(fiToolboxRootPath,'data','LifeTechnologies','*.mat'));
-  thisF = fiReadFluorophore(files(1).name)
+  thisF = fiReadFluorophore(files(3).name)
 %}
 
-%%
+%% File name, wave sampling, quantum efficiency
 p = inputParser;
 p.addRequired('fName',@ischar);
-p.addParameter('wave',(400:10:700)',@isvector);
+p.addParameter('wave',[],@isvector);
 p.addParameter('qe',1,@isscalar);
 
 p.parse(fName,varargin{:});
 inputs = p.Results;
 
-%%
+%% Load the file, which is a struct
 data = load(inputs.fName);
 
+% Create the fluorophore struct, with the wavelength in the file
 fl = fluorophoreCreate('type','custom',...
                        'wave',data.wave,...
                        'name',data.name,...
                        'solvent',data.solvent,...
                        'excitation',data.excitation,...
                        'emission',data.emission);
-                   
+
+% Set the qe
 fl = fluorophoreSet(fl,'qe',inputs.qe);
+
+% Change to a specified wavelength, if passed in.
 if ~isempty(inputs.wave)
     fl = fluorophoreSet(fl,'wave',inputs.wave);
 end

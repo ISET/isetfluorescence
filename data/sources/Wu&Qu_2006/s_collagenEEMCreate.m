@@ -1,5 +1,8 @@
 %% Create the EEM from the Wu and Qu data
 %
+%
+
+%%
 ieInit;
 datadir = fullfile(fiToolboxRootPath,'data','sources','Wu&Qu_2006');
 chdir(datadir);
@@ -43,27 +46,44 @@ collagenEEM = fiEEMInterp(collagenQ, 'old wave', oldWave,...
     'new wave', wave,...
     'dimension', 'excitation');
 
-%%
-comment = 'Created in s_collagenEEMCreate.  Special case.  See script';
-savedir = fullfile(fiToolboxRootPath,'data','Wu&Qu_2006');
+%% Use parafac to estimate excitation emission N=1
+% To get the actual eem at a wavelength, use
+%   fluorophorePlot(fl,'eem wave','excitation wave',val)
+%
+nFluorophores = 1;
+spectra = parafac(collagenEEM,nFluorophores);
+% ieNewGraphWin; plot(wave,spectra{1},'k-',wave,spectra{2},'r-');
 
-save(fullfile(savedir,'collagenEEM.mat'),'wave','collagenEEM','comment');
+%% Create the fluorophore
+collagenFluo = fluorophoreCreate('type','custom',...
+    'name','collagen',...
+    'solvent','none', ...
+    'wave', wave, ...
+    'excitation',spectra{2},...
+    'emission',spectra{1}); 
 
-%%
-ieNewGraphWin;
+% Adds the EEM that was used to derive the ex and em vectors above.
+collagenFluo = fluorophoreSet(collagenFluo,'eem',collagenEEM);
 
-% imagesc(flip(collagenEEM',1));
-% imagesc(wave,wave,collagenEEM');
-imagesc(wave,wave,flipdim(collagenEEM',1));
-set(gca,'yticklabels',[700 650 600 550 500 450 400]);
+%{
+fluorophorePlot(collagenFluo,'eem');
+fluorophorePlot(collagenFluo,'eem wave','excitation wave',420);
+fluorophorePlot(collagenFluo,'excitation');
+fluorophorePlot(collagenFluo,'emission');
+%}
 
-xlabel('Emission wavelength');
-ylabel('Excitation wavelength');
+%% Save
+comment = 'See s_collagenEEMCreate. EEM data from Wu&Qu. parafac (N=1) derived excitation/emission.';
+savePath = fullfile(fiToolboxRootPath,'data','Wu&Qu_2006','CollagenWuQu');
+fiSaveFluorophore(savePath, collagenFluo);
 
-%%
-emission415 = interp2(wave,wave,collagenEEM,415,wave);
-ieNewGraphWin;
-plotRadiance(wave,emission415);
+%{
+tst = fiReadFluorophore('CollagenWuQu','wave',wave);
+fluorophorePlot(tst,'eem');
+fluorophorePlot(tst,'eem wave','excitation wave',420);
+fluorophorePlot(tst,'excitation');
+fluorophorePlot(tst,'emission');
+%}
 
 %%
 %{

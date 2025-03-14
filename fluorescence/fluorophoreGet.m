@@ -66,10 +66,26 @@ function val = fluorophoreGet(fl,param,varargin)
 % See also  fluorophoreCreate, fluorophoreSet, fluorophoreRead
 %
 
-%% Parameter checking
-if ~exist('fl','var') || isempty(fl), error('Fluorophore structure required'); end
-if ~exist('param','var') || isempty(param), error('param required'); end
+% Example:
+%{
+elastin = fiReadFluorophore('elastin_webfluor.mat','wave',wave);
+emission = fluorophoreGet(elastin,'emission','wave',wave);
+% ieNewGraphWin; plot(wave,emission);
+%}
 
+%% Parameter checking
+p = inputParser;
+p.addRequired('fl',@isstruct);
+p.addRequired('param',@ischar);
+
+% When reading an emission or other wavelength we can set the wavelength
+% sampling vector
+p.addParameter('wave',[],@isvector);
+p.parse(fl,param,varargin{:});
+
+wave = p.Results.wave;
+if isfield(fl,'spectrum'), fwave = fl.spectrum.wave; end
+if isvector(fwave), fwave = fwave(:); end
 val = [];
 
 %% Main switch statement
@@ -89,30 +105,36 @@ switch param
         % Data are stored in photon units
         if ~checkfields(fl,'emission'), val = []; return; end
         val = fl.emission(:);
+        if ~isempty(wave)
+            val = interp1(fwave,val,wave);
+        end
 
     case {'emissionenergy'}
         val = fluorophoreGet(fl,'emission');  % Photons
-        wave = fluorophoreGet(fl,'wave');     % nm
-        val = Quanta2Energy(wave,val);
-        
+        val = Quanta2Energy(fwave,val);
+        if ~isempty(wave), val = interp1(fwave,val,wave); end
+
     case {'normemission','normalizedemission'}
         if ~checkfields(fl,'emission'), val = []; return; end
         val = fl.emission(:)/max(fl.emission);
-        
+        if ~isempty(wave), val = interp1(fwave,val,wave); end
+
     case {'excitation','excitationphotons'}
         % Data are stored in photon units (not energy)
         if ~checkfields(fl,'excitation'), val = []; return; end
         val = fl.excitation(:);
-        
+        if ~isempty(wave), val = interp1(fwave,val,wave); end
+
     case {'excitationenergy'}
         val = fluorophoreGet(fl,'excitation');  % Photons
-        wave = fluorophoreGet(fl,'wave');     % nm
-        val = Quanta2Energy(wave,val);
-        
+        val = Quanta2Energy(fwave,val);
+        if ~isempty(wave), val = interp1(fwave,val,wave); end
+
     case {'normexcitation','normalizedexcitation'}
         if ~checkfields(fl,'excitation'), val = []; return; end
         val = fl.excitation(:)/max(fl.excitation);
-        
+        if ~isempty(wave), val = interp1(fwave,val,wave); end
+
     case {'peakexcitation'}
         if ~checkfields(fl,'excitation'), val = []; return; end
         [~, id] = max(fl.excitation);
@@ -141,6 +163,8 @@ switch param
         %     fluorescenceSpectrum = dMatrix * illuminantPhotons(:)
         %
         % 
+        if ~isempty(wave), error('No eem photons wave resampling implemented yet.'); end
+
         deltaL = fluorophoreGet(fl,'delta wave');
 
         if isfield(fl,'donaldsonMatrix')
@@ -208,6 +232,8 @@ switch param
         % the energy, we place the energy2quanta scalers on either side to
         % convert the photon to energy.
         
+        % We do not resample w.r.t. wavelength here.
+        if ~isempty(wave), error('No eem wave resampling implemented yet.'); end
         %{
             wave = 365:5:705;
             flName = 'elastin_webfluor';
@@ -249,7 +275,7 @@ switch param
         val = DM*illSpd;
         
     case 'nwave'
-        val = length(fluorophoreGet(fl,'wave'));
+        val = length(fwave);
         
     case 'comment'
         val = fl.comment;
