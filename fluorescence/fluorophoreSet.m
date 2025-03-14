@@ -32,6 +32,7 @@ function fl = fluorophoreSet(fl,param,val,varargin)
 %                                   matrix, also known as the Donaldson matrix 
 %
 %      'wave'                     - spectral sampling vector
+%      'comment'                  - trying to be useful
 %
 % Outputs:
 %    fl - the fluorophore structure with the updated property.
