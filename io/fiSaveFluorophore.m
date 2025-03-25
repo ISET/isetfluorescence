@@ -17,6 +17,9 @@ function fiSaveFluorophore( fName, fl, varargin )
 %    .qe         - Quantum efficiency of excitation (Default is 1)
 %    .spectrum.wave - Wavelength samples
 %
+% And it can contain the following fields
+%    .comment
+%
 % As we get more data, including the full Excitation-Emission matrix
 % (eem) also called (donaldsonMatrix) from the webfluor site, we may
 % be changing the field names.
@@ -57,7 +60,7 @@ function fiSaveFluorophore( fName, fl, varargin )
 p = inputParser;
 p.addRequired('fName',@ischar);
 p.addRequired('fl',@isstruct);
-p.addOptional('comment','',@ischar);
+p.addParameter('comment','',@ischar);
 
 p.parse(fName,fl,varargin{:});
 inputs = p.Results;
@@ -65,7 +68,7 @@ inputs = p.Results;
 %% We assume that the fluorophore already contains all the necessary fields.
 
 % Why don't we just save 'fl'?
-%
+% Anyway, we require these fields
 name       = inputs.fl.name;
 solvent    = inputs.fl.solvent;
 if isfield(inputs.fl,'eem')
@@ -74,7 +77,10 @@ else
     eem = [];
 end
 
-comment    = inputs.comment;
+% Optional field
+if isfield(inputs.fl,'comment')
+    comment = inputs.fl.comment;
+end
 
 % Special case for HB when there are only excitation and emission vectors
 excitation = inputs.fl.excitation/max(inputs.fl.excitation);

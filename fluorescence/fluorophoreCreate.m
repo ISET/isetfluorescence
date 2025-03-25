@@ -75,6 +75,7 @@ p.addParameter('excitation',zeros(31,1),@isnumeric);
 p.addParameter('emission',zeros(31,1),@isnumeric);
 p.addParameter('qe',1,@isscalar);
 p.addParameter('eem',[],@isnumeric);
+p.addParameter('comment','',@ischar);
 
 p.parse(varargin{:});
 inputs = p.Results;
@@ -82,6 +83,7 @@ inputs = p.Results;
 %%
 fl.name = inputs.name;
 fl.type = 'fluorophore';
+
 fl = initDefaultSpectrum(fl,'custom',inputs.wave);
 
 
@@ -99,6 +101,7 @@ switch type
         fl = fluorophoreSet(fl,'solvent',inputs.solvent);
         fl = fluorophoreSet(fl,'eem',inputs.eem);
         fl = fluorophoreSet(fl,'qe',1);
+        fl = fluorophoreSet(fl,'comment',inputs.comment);
     
     case 'custom'
     
@@ -108,7 +111,8 @@ switch type
         fl = fluorophoreSet(fl,'excitation photons',inputs.excitation);
         fl = fluorophoreSet(fl,'emission photons',inputs.emission);
         fl = fluorophoreSet(fl,'qe',inputs.qe);
-    
+        fl = fluorophoreSet(fl,'comment',inputs.comment);
+
     case 'default'
         
         % Create a default, idealized fluorophore with gaussian excitation
@@ -128,8 +132,8 @@ switch type
         fl = fluorophoreSet(fl,'emission photons',em);
         fl = fluorophoreSet(fl,'qe',1);
         fl = fluorophoreSet(fl,'solvent','');
-                
-end
+        fl = fluorophoreSet(fl,'comment',inputs.comment);
 
+end
 
 end

@@ -48,6 +48,10 @@ fl = fluorophoreCreate('type','custom',...
                        'excitation',data.excitation,...
                        'emission',data.emission);
 
+if isfield(data,'comment')
+    fl = fluorophoreSet(fl,'comment',data.comment);
+end
+
 % Set the qe
 fl = fluorophoreSet(fl,'qe',inputs.qe);
 
@@ -55,8 +59,6 @@ fl = fluorophoreSet(fl,'qe',inputs.qe);
 if ~isempty(inputs.wave)
     fl = fluorophoreSet(fl,'wave',inputs.wave);
 end
-
-
 
 end
 

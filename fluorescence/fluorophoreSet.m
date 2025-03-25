@@ -32,6 +32,7 @@ function fl = fluorophoreSet(fl,param,val,varargin)
 %                                   matrix, also known as the Donaldson matrix 
 %
 %      'wave'                     - spectral sampling vector
+%      'comment'                  - trying to be useful
 %
 % Outputs:
 %    fl - the fluorophore structure with the updated property.
@@ -173,7 +174,7 @@ switch param
             newExcitation = interp1(oldW,excitation,newW);
             % plot(oldW,excitation,'k-',newW,newExcitation,'r:');
             if max(newExcitation) <= eps
-                warning('No excitation sensitivity in this waveband');
+                warning('%s: No excitation sensitivity in this waveband',fl.name);
             end
             emission = fluorophoreGet(fl,'emission photons','wave',oldW);
             newEmission = interp1(oldW,emission,newW,'linear',0);
@@ -186,6 +187,8 @@ switch param
 
     case 'solvent'
         fl.solvent = val;
+    case 'comment'
+        fl.comment = val;
         
     otherwise
         error('Unknown fluorophore parameter %s\n',param)

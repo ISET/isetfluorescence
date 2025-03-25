@@ -1,4 +1,4 @@
-function figHndl = fluorophorePlot(fl,pType,varargin)
+function figHdl = fluorophorePlot(fl,pType,varargin)
 % Gateway routine for plotting fluorophore data
 %
 % Input
@@ -47,11 +47,17 @@ p.addRequired('fl',@isstruct);
 p.addRequired('pType',@ischar)
 p.addParameter('normalize',false,@islogical);
 p.addParameter('excitationwave',[],@isnumeric);
+p.addParameter('fighdl',[],@(x)(isa(x,'matlab.ui.Figure')));
 
 p.parse(fl,pType,varargin{:});
 normalize = p.Results.normalize;
+figHdl    = p.Results.fighdl;
 
-figHndl = ieNewGraphWin;
+if isempty(figHdl)
+    figHdl = ieNewGraphWin;
+else
+    figure(figHdl);
+end
 
 %%
 switch pType
@@ -100,7 +106,7 @@ switch pType
         if normalize, dMatrix = dMatrix/max(dMatrix(:)); end
         emission = interp2(wave,wave,dMatrix,exWave,wave);
 
-        plotRadiance(wave,emission,'hdl',figHndl);
+        plotRadiance(wave,emission,'hdl',figHdl);
         title(sprintf('%s EEM (@ %d nm excite)',fl.name,exWave));
 
     case {'emission','emissionphotons'}
