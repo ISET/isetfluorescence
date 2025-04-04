@@ -9,7 +9,7 @@ plotRadiance(wave,emission);
 
 %% Shift it some number of nm longer
 n = numel(emission);
-shiftSize = 7;    % Shift this many nanometers to the right
+shiftSize = 9;    % Shift this many nanometers to the right
 k = zeros(1,51);
 k(26+shiftSize) = 1;
 tmp = conv(emission,k,'same');
