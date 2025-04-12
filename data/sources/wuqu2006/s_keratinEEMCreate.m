@@ -1,6 +1,7 @@
 %% s_keratinEMMCreate
 %
-% Create the keratin fluorophore based on the might Wu and Qu
+% Deprecated.  We are using only the 355 nm emission to create the keratin
+% fluorophore.  See s_wuquCreate
 %
 
 %% 
@@ -76,7 +77,7 @@ keratinF = fluorophoreSet(keratinF,'eem',keratinEEM);
 
 %{
 fluorophorePlot(keratinF,'eem');
-fluorophorePlot(keratinF,'eem wave','excitation wave',420);
+fluorophorePlot(keratinF,'eem wave','excitation wave',415);
 fluorophorePlot(keratinF,'excitation');
 fluorophorePlot(keratinF,'emission');
 %}
