@@ -23,8 +23,8 @@ flNames = {'CollagenWuQu','elastin_webfluor.mat'};
 %}
 %{
 wave = 400:10:700;
-[fBasis,wave] = fiLoadBasis(flNames,'wave',wave,'normalize',false);
-% ieNewGraphWin; plot(wave,fBasis);
+[fBasis,wave] = fiLoadBasis({'collagen1-smooth'},'wave',wave,'normalize',false);
+ieNewGraphWin; plot(wave,fBasis);
 %}
 
 %% Parse
