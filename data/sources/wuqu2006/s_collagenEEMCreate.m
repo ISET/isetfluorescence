@@ -1,5 +1,8 @@
 %% Create the EEM from the Wu and Qu data
 %
+%  Deprecated
+%  We no longer trust the EEM for this.  We are accepting the 355nm
+%  excitation as the single emission for collagen.
 %
 
 %%
@@ -18,7 +21,7 @@ filePath435 = which('collagen_435nm.mat');
 filePath457 = which('collagen_457nm.mat');
 filePath473 = which('collagen_473nm.mat');
 
-wave = 365:5:705;
+wave = 355:5:705;
 
 % These scaling factors are provided by the might Wu and Gu This make the
 % relative scaling for different excitation wavelengths correct, but not
@@ -50,8 +53,8 @@ collagenEEM = fiEEMInterp(collagenQ, 'old wave', oldWave,...
 % To get the actual eem at a wavelength, use
 %   fluorophorePlot(fl,'eem wave','excitation wave',val)
 %
-nFluorophores = 1;
-spectra = parafac(collagenEEM,nFluorophores);
+% nFluorophores = 1;
+% spectra = parafac(collagenEEM,nFluorophores);
 % ieNewGraphWin; plot(wave,spectra{1},'k-',wave,spectra{2},'r-');
 
 %% Create the fluorophore
@@ -59,8 +62,8 @@ collagenFluo = fluorophoreCreate('type','custom',...
     'name','collagen',...
     'solvent','none', ...
     'wave', wave, ...
-    'excitation',spectra{2},...
-    'emission',spectra{1}); 
+    'excitation',ones(size(wave)),...
+    'emission',collagen355); 
 
 % Adds the EEM that was used to derive the ex and em vectors above.
 collagenFluo = fluorophoreSet(collagenFluo,'eem',collagenEEM);

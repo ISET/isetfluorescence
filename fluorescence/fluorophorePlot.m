@@ -4,19 +4,26 @@ function figHdl = fluorophorePlot(fl,pType,varargin)
 % Input
 %   fl - Fluorophore structure
 %   pType - plot type.  
-%    Options:
-%      {'eem mesh','donaldson mesh'}
-%      {'eem image','donaldson image'}
-%      'excitation'
-%      'emission'
+%      'eem mesh'      - EEM as a mesh
+%      'eem image'     - EEM as an image
+%      'excitation'    - Excitation sensitivity
+%      'emission'      - Emissions spectrum.  Specify excitation
+%                        wavelength, if there is a full EEM
 %
 % Optional key/value pairs
+%    fighdl
+%    normalize       - Scale the emission to peak of 1
+%    excitation wave - When there is an EEM, specify the excitation wave
+%                      here.
+%    linewidth       - Default: 1.2
+%    linecolor       - Default:  'k'
+%    linestyle       - Default '-'
 %
 % Returns
-%
-% Wandell, Vistasoft team 2018
+%    fighdl
 %
 % See also
+%  fluorophoreRead
 %
 
 % Examples:
@@ -30,11 +37,11 @@ fluorophorePlot(fl,'emission');
 %}
 %{
 fl = fluorophoreRead('alamarBlue');
-fluorophorePlot(fl,'donaldsonmesh');
+fluorophorePlot(fl,'eem mesh');
 %}
 %{
 fl = fluorophoreRead('alamarBlue');
-fluorophorePlot(fl,'donaldsonimage');
+fluorophorePlot(fl,'eem image');
 %}
 
 %%
@@ -48,6 +55,9 @@ p.addRequired('pType',@ischar)
 p.addParameter('normalize',false,@islogical);
 p.addParameter('excitationwave',[],@isnumeric);
 p.addParameter('fighdl',[],@(x)(isa(x,'matlab.ui.Figure')));
+p.addParameter('linewidth',1.2,@isnumeric);
+p.addParameter('linecolor','k',@ischar);
+p.addParameter('linestyle','-',@ischar);
 
 p.parse(fl,pType,varargin{:});
 normalize = p.Results.normalize;
@@ -61,7 +71,7 @@ end
 
 %%
 switch pType
-    case {'donaldsonimage','donaldsonmatrix','eem'}
+    case {'eem','eemimage','donaldsonimage','donaldsonmatrix'}
         % fluorophorePlot(fl,'donaldson image');
         %
         % Computed for photons
@@ -117,7 +127,10 @@ switch pType
         data = fluorophoreGet(fl,'emission');
 
         if normalize, data = data/max(data(:)); end
-        plot(wave,data,'k-','linewidth',1); grid on;
+        
+        plot(wave,data,'k-','LineWidth',p.Results.linewidth, ...
+            'Color',p.Results.linecolor,...
+            'LineStyle',p.Results.linestyle);
         grid on; xlabel('Wavelength (nm)'); ylabel('Emission (photons, a.u.)');
         title(sprintf('%s: emission',fluorophoreGet(fl,'name')));
 
@@ -130,7 +143,10 @@ switch pType
         data = fluorophoreGet(fl,'excitation');
 
         if normalize, data = data/max(data(:)); end
-        plot(wave,data,'k-','linewidth',1); grid on;
+
+        plot(wave,data,'k-','LineWidth',p.Results.linewidth, ...
+            'Color',p.Results.linecolor,...
+            'LineStyle',p.Results.linestyle);
         grid on; xlabel('Wavelength (nm)'); ylabel('Excitation (photons, a.u.)');
         title(sprintf('%s: excitation',fluorophoreGet(fl,'name')));
 

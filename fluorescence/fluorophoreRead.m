@@ -70,6 +70,13 @@ else
         'solvent',   data.solvent,...
         'excitation',data.excitation,...
         'emission',  data.emission);
-end                
+end        
+
+% If there is a comment field in the saved file, add it to the fluorophore
+% struct.
+if isfield(data,'comment')
+    fl.comment = data.comment;
+end
+
 end
 
