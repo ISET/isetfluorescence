@@ -7,16 +7,16 @@ ieInit;
 
 wave = 350:760;
 
-emission = ieReadSpectra('chlorophyllA_emission',wave);
+emission = ieReadSpectra('chlorophyllA_emission.mat',wave);
+excitation = ieReadSpectra('chlorophyllA_absorption.mat',wave);
 
 chlorophyllAF = fluorophoreCreate('type','custom',...
     'name','chlorophyllA',...
     'solvent','none', ...
     'wave', wave, ...
-    'excitation',ones(size(wave)),...
+    'excitation',excitation,...
     'emission',emission);
 
-comment = 'See s_wagnieresCreate. Only emission data provided.';
 savePath = fullfile(fiToolboxRootPath,'data','chlorophyllA','chlorophyllA');
 fiSaveFluorophore(savePath, chlorophyllAF);
 
